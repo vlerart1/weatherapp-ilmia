@@ -1,104 +1,435 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f6f3">
-  <meta name="description" content="A clear view of weather now, next, and wherever you go.">
-  <meta property="og:title" content="Weatherline | A clearer forecast">
-  <meta property="og:description" content="Current conditions, detailed forecasts, and saved places in one calm weather workspace.">
-  <meta property="og:type" content="website">
-  <title>Weatherline | A clearer forecast</title>
-  <link rel="icon" href="weather.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="main.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-  <script src="main.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A premium weather experience with accurate forecasts, beautiful design, and intuitive interface.">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Weatherline | Premium Weather Experience</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Weatherline">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 </head>
 <body>
-  <div class="app-shell" id="app" aria-busy="true">
+  <!-- Dynamic Weather Background -->
+  <div class="weather-background" id="weather-background">
+    <div class="gradient-layer"></div>
+    <div class="particle-layer"></div>
+  </div>
+
+  <!-- App Container -->
+  <div class="app-container">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button class="menu-toggle" id="menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="header-location" id="header-location">Loading...</div>
+      <button class="header-action" id="location-btn" aria-label="Use current location">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+          <circle cx="12" cy="12" r="8"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Sidebar Navigation (Desktop) -->
     <aside class="sidebar" id="sidebar">
-      <a class="brand" href="#home" aria-label="Weatherline home">
-        <span class="brand-mark" aria-hidden="true">w.</span><span>weatherline</span>
-      </a>
-      <p class="nav-label">WORKSPACE</p>
-      <nav class="primary-nav" aria-label="Main navigation">
-        <a href="#home" data-page="home"><span aria-hidden="true">◫</span>Overview</a>
-        <a href="#forecast" data-page="forecast"><span aria-hidden="true">▥</span>Forecast</a>
-        <a href="#map" data-page="map"><span aria-hidden="true">◎</span>Weather map</a>
-        <a href="#locations" data-page="locations"><span aria-hidden="true">⌖</span>Locations</a>
-        <a href="#compare" data-page="compare"><span aria-hidden="true">⇆</span>Compare</a>
-        <a href="#alerts" data-page="alerts"><span aria-hidden="true">♧</span>Alerts</a>
+      <div class="sidebar-brand">
+        <span class="brand-icon">☀</span>
+        <span class="brand-name">Weatherline</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#home" class="nav-item active" data-page="home">
+          <span class="nav-icon">◫</span>
+          <span class="nav-label">Home</span>
+        </a>
+        <a href="#forecast" class="nav-item" data-page="forecast">
+          <span class="nav-icon">▥</span>
+          <span class="nav-label">Forecast</span>
+        </a>
+        <a href="#map" class="nav-item" data-page="map">
+          <span class="nav-icon">◎</span>
+          <span class="nav-label">Map</span>
+        </a>
+        <a href="#alerts" class="nav-item" data-page="alerts">
+          <span class="nav-icon">♧</span>
+          <span class="nav-label">Alerts</span>
+        </a>
+        <a href="#locations" class="nav-item" data-page="locations">
+          <span class="nav-icon">⌖</span>
+          <span class="nav-label">Locations</span>
+        </a>
+        <a href="#settings" class="nav-item" data-page="settings">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-label">Settings</span>
+        </a>
       </nav>
-      <div class="sidebar-rule"></div>
-      <a class="settings-link" href="#settings" data-page="settings"><span aria-hidden="true">⚙</span>Settings</a>
-      <div class="sidebar-bottom"><span class="live-dot"></span><span>Forecast data updated live</span></div>
+      <div class="sidebar-footer">
+        <span class="live-indicator"></span>
+        <span class="live-text">Live updates</span>
+      </div>
     </aside>
 
-    <div class="workspace">
-      <header class="topbar">
-        <button class="mobile-menu" id="mobile-menu" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button>
-        <div class="breadcrumb"><span>WEATHERLINE</span><span aria-hidden="true">/</span><strong id="page-title">Overview</strong></div>
-        <div class="search-area">
-          <form class="search-form" id="search-form" role="search">
-            <label class="sr-only" for="location-search">Search city, region, or country</label>
-            <span class="search-icon" aria-hidden="true">⌕</span>
-            <input id="location-search" class="search-input" type="search" placeholder="Search a city or region" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="location-suggestions" aria-expanded="false">
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Search Bar -->
+      <div class="search-container">
+        <form class="search-form" id="search-form">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            type="search"
+            id="search-input"
+            placeholder="Search city, region, or country"
+            autocomplete="off"
+            aria-label="Search location"
+          >
+          <button type="submit" class="search-submit" aria-label="Search">
             <kbd>↵</kbd>
-          </form>
-          <ul class="suggestions" id="location-suggestions" role="listbox" aria-label="Location suggestions" hidden></ul>
-        </div>
-        <div class="topbar-actions">
-          <button class="unit-toggle" id="unit-toggle" type="button" aria-label="Switch temperature unit">°C <span>/</span> °F</button>
-          <button class="icon-button" id="use-location" type="button" aria-label="Use my current location" title="Use my current location"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path><circle cx="12" cy="12" r="8"></circle></svg></button>
-          <button class="avatar-button" id="favorite-current" type="button" aria-label="Save current location" title="Save current location">☆</button>
-        </div>
-      </header>
+          </button>
+        </form>
+        <div class="search-suggestions" id="search-suggestions" hidden></div>
+      </div>
 
-      <main class="main-content">
-        <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
-        <section class="loading-panel" id="loading-panel" aria-label="Loading weather">
-          <div class="loading-copy"><span class="skeleton skeleton-short"></span><span class="skeleton skeleton-title"></span><span class="skeleton skeleton-line"></span></div><span class="skeleton skeleton-orb"></span>
+      <!-- Status Messages -->
+      <div class="status-message" id="status-message" role="status" aria-live="polite"></div>
+
+      <!-- Notification Container -->
+      <div class="notification-container" id="notification-container" role="alert" aria-live="polite"></div>
+
+      <!-- Loading State -->
+      <div class="loading-state" id="loading-state">
+        <div class="loading-skeleton">
+          <div class="skeleton skeleton-location"></div>
+          <div class="skeleton skeleton-temp"></div>
+          <div class="skeleton skeleton-condition"></div>
+          <div class="skeleton skeleton-metric"></div>
+          <div class="skeleton skeleton-metric"></div>
+          <div class="skeleton skeleton-metric"></div>
+        </div>
+      </div>
+
+      <!-- Weather Content -->
+      <div class="weather-content" id="weather-content" hidden>
+        <!-- Home Page -->
+        <section class="page" id="page-home" data-page="home">
+          <!-- Hero Section -->
+          <div class="hero-section">
+            <div class="hero-info">
+              <div class="hero-date" id="hero-date"></div>
+              <h1 class="hero-location" id="hero-location"></h1>
+              <p class="hero-summary" id="hero-summary"></p>
+            </div>
+            <div class="hero-weather">
+              <div class="hero-temp" id="hero-temp">--°</div>
+              <div class="hero-icon" id="hero-icon">☀</div>
+              <div class="hero-condition" id="hero-condition">Loading...</div>
+              <div class="hero-feels" id="hero-feels"></div>
+            </div>
+            <div class="hero-range">
+              <span class="range-label">Today</span>
+              <span class="range-high" id="range-high">H --°</span>
+              <span class="range-low" id="range-low">L --°</span>
+            </div>
+          </div>
+
+          <!-- Sun Progress -->
+          <div class="sun-section">
+            <svg class="sun-chart" viewBox="0 0 300 100" aria-label="Sunrise to sunset visualization">
+              <path class="sun-track" d="M20 90 C80 10 220 10 280 90"/>
+              <path class="sun-progress" id="sun-progress" d="M20 90 C80 10 220 10 280 90"/>
+              <circle class="sun-position" id="sun-position" cx="150" cy="25" r="6"/>
+              <circle class="sun-rise" cx="20" cy="90" r="3"/>
+              <circle class="sun-set" cx="280" cy="90" r="3"/>
+            </svg>
+            <div class="sun-times">
+              <div class="sun-time">
+                <span class="sun-label">Sunrise</span>
+                <span class="sun-value" id="sunrise-time">--:--</span>
+              </div>
+              <div class="sun-time sun-center">
+                <span class="sun-label">Daylight</span>
+                <span class="sun-value" id="daylight-duration">--h --m</span>
+              </div>
+              <div class="sun-time">
+                <span class="sun-label">Sunset</span>
+                <span class="sun-value" id="sunset-time">--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metrics Grid -->
+          <div class="metrics-section">
+            <h2 class="section-title">Today's Details</h2>
+            <div class="metrics-grid" id="metrics-grid"></div>
+          </div>
+
+          <!-- Hourly Preview -->
+          <div class="hourly-section">
+            <div class="section-header">
+              <h2 class="section-title">Hourly Forecast</h2>
+              <button class="view-all-btn" data-navigate="forecast">View 24h →</button>
+            </div>
+            <div class="hourly-scroll" id="hourly-preview"></div>
+          </div>
+
+          <!-- Daily Preview -->
+          <div class="daily-section">
+            <div class="section-header">
+              <h2 class="section-title">7-Day Forecast</h2>
+              <button class="view-all-btn" data-navigate="forecast">Details →</button>
+            </div>
+            <div class="daily-list" id="daily-preview"></div>
+          </div>
+
+          <!-- Weather Insights -->
+          <div class="insights-section">
+            <h2 class="section-title">Weather Insights</h2>
+            <div class="insights-list" id="insights-list"></div>
+          </div>
         </section>
 
-        <div id="weather-content" hidden>
-          <section class="page-view" data-view="home">
-            <div class="page-heading"><div><p class="eyebrow" id="local-date"></p><h1>Good weather starts here.</h1><p class="page-subtitle">A considered look at the sky, <span id="heading-location"></span>.</p></div><button class="text-button" data-navigate="forecast" type="button">Full forecast <span aria-hidden="true">↗</span></button></div>
-            <section class="hero-panel" id="weather-hero" aria-labelledby="location-name">
-              <div class="hero-image" aria-hidden="true"></div>
-              <div class="hero-main"><div class="hero-location-line"><div><p class="eyebrow light" id="location-context">CURRENT CONDITIONS</p><h2 id="location-name">New York</h2></div><button class="favorite-toggle" id="hero-favorite" type="button" aria-label="Add location to favorites" aria-pressed="false">☆</button></div>
-                <div class="current-reading"><span class="temperature" id="current-temperature">--°</span><span class="weather-glyph" id="current-icon" aria-hidden="true">☀</span></div>
-                <p class="condition-description" id="condition-description">Loading conditions</p><p class="feels-like" id="feels-like"></p>
+        <!-- Forecast Page -->
+        <section class="page" id="page-forecast" data-page="forecast" hidden>
+          <div class="page-header">
+            <h1>Forecast</h1>
+            <p>Detailed hourly and extended forecasts</p>
+          </div>
+
+          <!-- Chart Section -->
+          <div class="chart-section">
+            <div class="chart-tabs">
+              <button class="chart-tab active" data-chart="temperature">Temperature</button>
+              <button class="chart-tab" data-chart="precipitation">Rain</button>
+              <button class="chart-tab" data-chart="wind">Wind</button>
+              <button class="chart-tab" data-chart="humidity">Humidity</button>
+            </div>
+            <div class="chart-container">
+              <svg class="forecast-chart" id="forecast-chart" viewBox="0 0 800 220" aria-label="Weather chart"></svg>
+              <div class="chart-tooltip" id="chart-tooltip" hidden></div>
+            </div>
+          </div>
+
+          <!-- Extended Hourly -->
+          <div class="extended-hourly">
+            <h2 class="section-title">24-Hour Forecast</h2>
+            <div class="hourly-list" id="hourly-extended"></div>
+          </div>
+
+          <!-- Extended Daily -->
+          <div class="extended-daily">
+            <h2 class="section-title">14-Day Forecast</h2>
+            <div class="daily-list extended" id="daily-extended"></div>
+          </div>
+        </section>
+
+        <!-- Map Page -->
+        <section class="page" id="page-map" data-page="map" hidden>
+          <div class="page-header">
+            <h1>Weather Map</h1>
+            <p>Interactive weather visualization</p>
+          </div>
+          <div class="map-container">
+            <div class="map-toolbar">
+              <div class="map-layers">
+                <button class="map-layer active" data-layer="radar">Radar</button>
+                <button class="map-layer" data-layer="rain">Rain</button>
+                <button class="map-layer" data-layer="temp">Temperature</button>
+                <button class="map-layer" data-layer="wind">Wind</button>
+                <button class="map-layer" data-layer="clouds">Clouds</button>
               </div>
-              <div class="hero-aside"><div class="hero-day-range"><span>Today's range</span><strong id="high-low">H --° <i></i> L --°</strong></div><div class="hero-sun" id="sun-visualization"><svg viewBox="0 0 300 122" role="img" aria-labelledby="sun-chart-title"><title id="sun-chart-title">Sunrise to sunset timeline and current daylight</title><path class="sun-track" d="M18 104 C76 5 224 5 282 104"></path><path class="sun-progress" id="sun-progress" d="M18 104 C76 5 224 5 282 104"></path><circle class="sun-position" id="sun-position" cx="150" cy="25" r="7"></circle><circle class="sun-horizon" cx="18" cy="104" r="3"></circle><circle class="sun-horizon" cx="282" cy="104" r="3"></circle></svg><div class="sun-times"><span><small>Sunrise</small><strong id="sunrise-time">--</strong></span><span class="daylight-value"><small>Daylight</small><strong id="daylight-duration">--</strong></span><span><small>Sunset</small><strong id="sunset-time">--</strong></span></div></div></div>
-            </section>
-            <section class="overview-grid" aria-label="Today's weather details"><div class="overview-left"><div class="section-heading"><div><p class="eyebrow">AT A GLANCE</p><h2>Today's details</h2></div><span class="update-label" id="updated-time"></span></div><div class="metrics-grid" id="weather-metrics"></div></div>
-              <div class="air-panel" id="air-panel"><div class="section-heading compact"><div><p class="eyebrow">BREATHE EASY</p><h2>Air quality</h2></div><span class="air-dot" id="air-dot"></span></div><div class="air-reading"><strong id="air-value">--</strong><span id="air-category">Checking air</span></div><div class="aqi-scale" aria-label="Air quality index scale"><span></span><span></span><span></span><span></span><span></span><span></span><i id="aqi-marker"></i></div><p class="air-advice" id="air-advice">Air quality information is loading.</p><div class="pollutant-list" id="pollutant-list"></div></div>
-            </section>
-            <section class="preview-grid"><div class="section-block"><div class="section-heading"><div><p class="eyebrow">HOUR BY HOUR</p><h2>Coming up</h2></div><button class="subtle-link" data-navigate="forecast" type="button">24 hours <span aria-hidden="true">→</span></button></div><div class="hourly-list" id="hourly-preview" aria-label="Next hours forecast"></div></div><div class="section-block week-preview"><div class="section-heading"><div><p class="eyebrow">THE WEEK AHEAD</p><h2>Seven days</h2></div><button class="subtle-link" data-navigate="forecast" type="button">Details <span aria-hidden="true">→</span></button></div><div class="daily-list compact-daily" id="daily-preview"></div></div></section>
-            <section class="chart-section"><div class="section-heading"><div><p class="eyebrow">WEATHER RHYTHM</p><h2>Temperature outlook</h2></div><div class="chart-tabs" role="group" aria-label="Chart metric"><button type="button" data-chart="temperature" aria-pressed="true">Temperature</button><button type="button" data-chart="precipitation" aria-pressed="false">Rain</button><button type="button" data-chart="wind" aria-pressed="false">Wind</button></div></div><div class="chart-wrap" id="chart-wrap"><svg id="weather-chart" viewBox="0 0 800 220" role="img" aria-label="Hourly temperature chart"></svg><div class="chart-tooltip" id="chart-tooltip" hidden></div></div><div class="chart-legend"><span class="legend-dot"></span><span id="chart-unit">Temperature</span><span class="chart-note">Next 24 hours · local time</span></div></section>
-          </section>
+              <button class="map-locate" id="map-locate" aria-label="Center on current location">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+                  <circle cx="12" cy="12" r="8"/>
+                </svg>
+              </button>
+            </div>
+            <div id="weather-map" class="weather-map"></div>
+            <div class="map-legend" id="map-legend"></div>
+          </div>
+        </section>
 
-          <section class="page-view" data-view="forecast" hidden><div class="page-heading"><div><p class="eyebrow">LOOK AHEAD</p><h1>Forecast</h1><p class="page-subtitle">The details you need to plan the hours and days ahead.</p></div></div><section class="forecast-page-panel"><div class="section-heading"><div><p class="eyebrow">NEXT 24 HOURS</p><h2>Hourly conditions</h2></div><div class="chart-tabs" role="group" aria-label="Forecast chart metric"><button type="button" data-chart="temperature" aria-pressed="true">Temperature</button><button type="button" data-chart="precipitation" aria-pressed="false">Rain</button><button type="button" data-chart="wind" aria-pressed="false">Wind</button><button type="button" data-chart="humidity" aria-pressed="false">Humidity</button><button type="button" data-chart="pressure" aria-pressed="false">Pressure</button></div></div><div class="chart-wrap large-chart" id="forecast-chart-wrap"><svg id="forecast-chart" viewBox="0 0 1000 270" role="img" aria-label="24-hour weather chart"></svg><div class="chart-tooltip" id="forecast-tooltip" hidden></div></div><div class="chart-legend"><span class="legend-dot"></span><span id="forecast-chart-unit">Temperature</span><span class="chart-note">Hover or focus a point for details</span></div><div class="hourly-list expanded-hourly" id="hourly-expanded" aria-label="24-hour detailed forecast"></div></section><section class="forecast-page-panel extended-panel"><div class="section-heading"><div><p class="eyebrow">PLAN YOUR WEEK</p><h2>Extended forecast</h2></div><span class="section-note">Up to 14 days where available</span></div><div class="daily-list extended-daily" id="daily-extended"></div><div class="day-detail" id="day-detail" hidden></div></section></section>
+        <!-- Alerts Page -->
+        <section class="page" id="page-alerts" data-page="alerts" hidden>
+          <div class="page-header">
+            <h1>Weather Alerts</h1>
+            <p>Severe weather warnings and advisories</p>
+          </div>
+          <div class="alerts-list" id="alerts-list"></div>
+        </section>
 
-          <section class="page-view" data-view="map" hidden><div class="page-heading"><div><p class="eyebrow">THE BIGGER PICTURE</p><h1>Weather map</h1><p class="page-subtitle">Explore your saved places on a live interactive map.</p></div></div><section class="map-panel"><div class="map-toolbar"><div><strong>Saved locations</strong><span id="map-location-count">Your places, in one view</span></div><span class="map-credit">Map tiles © OpenStreetMap contributors</span></div><div id="weather-map" role="region" aria-label="Map of your saved locations"></div><p class="map-disclosure">Weather overlays and radar require a dedicated weather tile provider. This map currently plots your places without implying unsupported live radar data.</p></section></section>
+        <!-- Locations Page -->
+        <section class="page" id="page-locations" data-page="locations" hidden>
+          <div class="page-header">
+            <h1>Locations</h1>
+            <p>Manage your saved places</p>
+          </div>
+          <div class="locations-layout">
+            <div class="locations-section">
+              <h2 class="section-title">Favorites</h2>
+              <div class="location-list" id="favorites-list"></div>
+            </div>
+            <div class="locations-section">
+              <h2 class="section-title">Recent</h2>
+              <button class="clear-recent" id="clear-recent">Clear</button>
+              <div class="location-list" id="recent-list"></div>
+            </div>
+          </div>
+        </section>
 
-          <section class="page-view" data-view="locations" hidden><div class="page-heading"><div><p class="eyebrow">YOUR PLACES</p><h1>Locations</h1><p class="page-subtitle">Keep the places you care about close at hand.</p></div></div><section class="locations-layout"><div class="locations-column"><div class="section-heading"><div><p class="eyebrow">QUICK ACCESS</p><h2>Favorites</h2></div><span class="section-note" id="favorite-count"></span></div><div class="location-list" id="favorite-list"></div></div><div class="locations-column recent-column"><div class="section-heading"><div><p class="eyebrow">RECENTLY VIEWED</p><h2>Recent places</h2></div><button id="clear-recent" class="subtle-link" type="button">Clear</button></div><div class="location-list" id="recent-list"></div></div></section></section>
+        <!-- Settings Page -->
+        <section class="page" id="page-settings" data-page="settings" hidden>
+          <div class="page-header">
+            <h1>Settings</h1>
+            <p>Customize your weather experience</p>
+          </div>
+          <div class="settings-list">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Temperature</h3>
+                <p>Choose temperature unit</p>
+              </div>
+              <select id="setting-temperature" aria-label="Temperature unit">
+                <option value="celsius">Celsius (°C)</option>
+                <option value="fahrenheit">Fahrenheit (°F)</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Wind Speed</h3>
+                <p>Choose wind speed unit</p>
+              </div>
+              <select id="setting-wind" aria-label="Wind speed unit">
+                <option value="kmh">km/h</option>
+                <option value="mph">mph</option>
+                <option value="ms">m/s</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Pressure</h3>
+                <p>Choose pressure unit</p>
+              </div>
+              <select id="setting-pressure" aria-label="Pressure unit">
+                <option value="hpa">hPa</option>
+                <option value="inhg">inHg</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Distance</h3>
+                <p>Choose distance unit</p>
+              </div>
+              <select id="setting-distance" aria-label="Distance unit">
+                <option value="km">Kilometers</option>
+                <option value="mi">Miles</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Time Format</h3>
+                <p>Choose time format</p>
+              </div>
+              <select id="setting-time" aria-label="Time format">
+                <option value="12">12-hour</option>
+                <option value="24">24-hour</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Theme</h3>
+                <p>Choose appearance theme</p>
+              </div>
+              <select id="setting-theme" aria-label="Theme">
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Animations</h3>
+                <p>Enable animations and transitions</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-animations" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Notification Duration</h3>
+                <p>How long notifications stay visible</p>
+              </div>
+              <select id="setting-notification-duration" aria-label="Notification duration">
+                <option value="3000">3 seconds</option>
+                <option value="5000" selected>5 seconds</option>
+                <option value="10000">10 seconds</option>
+                <option value="30000">30 seconds</option>
+                <option value="0">Never</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h3>Weather Alerts</h3>
+                <p>Enable automatic weather alert generation</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-alerts" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
 
-          <section class="page-view" data-view="compare" hidden><div class="page-heading"><div><p class="eyebrow">SIDE BY SIDE</p><h1>Compare places</h1><p class="page-subtitle">See how conditions differ across your saved locations.</p></div></div><section class="compare-panel"><p class="compare-hint">Choose 2–4 places from your favorites.</p><div id="compare-selection" class="compare-selection"></div><div id="comparison-grid" class="comparison-grid"></div></section></section>
-
-          <section class="page-view" data-view="alerts" hidden><div class="page-heading"><div><p class="eyebrow">STAY AWARE</p><h1>Weather alerts</h1><p class="page-subtitle">Official warnings for the places you follow.</p></div></div><section class="empty-state alert-empty"><span class="empty-icon" aria-hidden="true">⌁</span><h2>Alert feeds are not connected</h2><p>The current weather provider does not supply official severe-weather alerts. Connect a regional alert service before using this as a source for safety warnings.</p><a href="https://www.weather.gov/documentation/services-web-api" target="_blank" rel="noreferrer">Explore an official alert API ↗</a></section></section>
-
-          <section class="page-view" data-view="settings" hidden><div class="page-heading"><div><p class="eyebrow">MAKE IT YOURS</p><h1>Settings</h1><p class="page-subtitle">Tune the forecast to the way you read weather.</p></div></div><section class="settings-panel"><div class="settings-row"><div><h2>Appearance</h2><p>Use your system preference or choose a theme.</p></div><select id="theme-setting" aria-label="Color theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div><div class="settings-row"><div><h2>Temperature</h2><p>Choose the scale for temperatures.</p></div><select id="temperature-setting" aria-label="Temperature unit"><option value="celsius">Celsius (°C)</option><option value="fahrenheit">Fahrenheit (°F)</option></select></div><div class="settings-row"><div><h2>Wind speed</h2><p>Choose how wind speed is shown.</p></div><select id="wind-setting" aria-label="Wind speed unit"><option value="kmh">Kilometres per hour</option><option value="mph">Miles per hour</option><option value="ms">Metres per second</option></select></div><div class="settings-row"><div><h2>Pressure</h2><p>Choose the pressure unit.</p></div><select id="pressure-setting" aria-label="Pressure unit"><option value="hpa">Hectopascals (hPa)</option><option value="inhg">Inches of mercury (inHg)</option></select></div><div class="settings-row"><div><h2>Distance</h2><p>Choose the visibility unit.</p></div><select id="distance-setting" aria-label="Distance unit"><option value="km">Kilometres</option><option value="mi">Miles</option></select></div><div class="settings-row"><div><h2>Motion</h2><p>Respect your device's reduced-motion setting.</p></div><span class="setting-note" id="motion-setting"></span></div><div class="settings-row notification-row"><div><h2>Notifications</h2><p>Alerts require a regional data service and a server or push provider.</p></div><button type="button" disabled title="A notification service is not connected">Not available</button></div><div class="settings-footer" id="settings-saved" role="status" aria-live="polite"></div></section></section>
-
-          <section class="page-view" data-view="detail" hidden><div class="page-heading"><div><p class="eyebrow">LOCATION BRIEFING</p><h1 id="detail-title">Weather details</h1><p class="page-subtitle">Current conditions and the forecast for this place.</p></div><button class="text-button" data-navigate="home" type="button">← Back to overview</button></div><section class="detail-grid"><div class="detail-summary" id="detail-summary"></div><div class="sun-detail" id="sun-detail"></div></section><section class="forecast-page-panel"><div class="section-heading"><div><p class="eyebrow">DETAILED OUTLOOK</p><h2>Weather through the week</h2></div></div><div class="daily-list extended-daily" id="detail-daily"></div></section><section class="details-section"><div class="section-heading"><div><p class="eyebrow">CURRENT READINGS</p><h2>Conditions</h2></div></div><div class="metrics-grid" id="detail-metrics"></div></section></section>
-        </div>
-      </main>
-
-      <footer class="site-footer"><span>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a></span><span id="footer-place">Forecasts for wherever you are.</span><span>Weatherline is informational, not an emergency service.</span></footer>
-    </div>
-    <nav class="mobile-nav" aria-label="Mobile navigation"><a href="#home" data-page="home" aria-label="Overview"><span>◫</span><small>Home</small></a><a href="#forecast" data-page="forecast" aria-label="Forecast"><span>▥</span><small>Forecast</small></a><a href="#map" data-page="map" aria-label="Weather map"><span>◎</span><small>Map</small></a><a href="#locations" data-page="locations" aria-label="Locations"><span>⌖</span><small>Places</small></a><a href="#settings" data-page="settings" aria-label="Settings"><span>⚙</span><small>Settings</small></a></nav>
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+      <a href="#home" class="mobile-nav-item active" data-page="home">
+        <span class="nav-icon">◫</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="#forecast" class="mobile-nav-item" data-page="forecast">
+        <span class="nav-icon">▥</span>
+        <span class="nav-label">Forecast</span>
+      </a>
+      <a href="#map" class="mobile-nav-item" data-page="map">
+        <span class="nav-icon">◎</span>
+        <span class="nav-label">Map</span>
+      </a>
+      <a href="#alerts" class="mobile-nav-item" data-page="alerts">
+        <span class="nav-icon">♧</span>
+        <span class="nav-label">Alerts</span>
+      </a>
+      <a href="#locations" class="mobile-nav-item" data-page="locations">
+        <span class="nav-icon">⌖</span>
+        <span class="nav-label">Places</span>
+      </a>
+      <a href="#settings" class="mobile-nav-item" data-page="settings">
+        <span class="nav-icon">⚙</span>
+        <span class="nav-label">Settings</span>
+      </a>
+    </nav>
   </div>
+
+  <script src="js/app.js"></script>
 </body>
 </html>
